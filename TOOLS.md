@@ -1,23 +1,34 @@
 # TOOLS.md — Local Notes
 
-Skills define _how_ tools work. This file is for _your_ specifics — the stuff unique to your setup.
+Skills define _how_ tools work. This file is for _your_ specifics.
 
-## What Goes Here
+## Factory API
 
-Environment-specific details:
+* **Base URL:** `http://localhost:${FACTORY_PORT}` (default: `http://localhost:4000`)
+* **Auth:** Bearer token via `FACTORY_API_TOKEN` (if configured)
+* **Docs:** See [spec/ORCHESTRATION.md](spec/ORCHESTRATION.md)
 
-- Camera names and locations
-- SSH hosts and aliases
-- Preferred voices for TTS
-- Speaker/room names
-- Device nicknames
-- API endpoints or service URLs
+## Data Directory
+
+* **Path:** `$AGENT_DATA_DIR` (see .env)
+* **Contains:** `tasks.md`, `PLAN.md`, `memory/`, `logs/`, `sessions/`
+
+## Environment-Specific Details
+
+Add your specifics here:
+
+* Camera names and locations
+* SSH hosts and aliases
+* Preferred voices for TTS
+* Speaker/room names
+* Device nicknames
+* Target repository paths for sessions
 
 ## Why Separate?
 
 Skills are shared. Your setup is yours. Keeping them apart means you can update skills without losing your notes, and share skills without leaking your infrastructure.
 
-> Safety rules for what to share vs keep private: [spec/SAFETY.md](spec/SAFETY.md)
+> Safety rules: [spec/SAFETY.md](spec/SAFETY.md)
 
 ---
 

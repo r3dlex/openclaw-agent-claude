@@ -1,111 +1,149 @@
-# OpenClaw Agent for Claude
+# Software Factory: Claude Code Orchestrator
 
-An autonomous AI agent workspace for [OpenClaw](https://docs.openclaw.ai/) — a self-hosted gateway bridging messaging platforms to AI coding agents.
+An autonomous software factory built on [OpenClaw](https://docs.openclaw.ai/) and Elixir/OTP. It orchestrates multiple [Claude Code](https://docs.anthropic.com/en/docs/claude-code) CLI sessions to build software end-to-end through messaging platforms.
 
-This repo defines a Claude-powered agent that operates as a **Lead Orchestrator** with three internal modes: Architect, Builder, and Auditor. It manages software projects end-to-end with shift-left quality, DDD architecture, and autonomous execution.
+## Architecture
 
-## Features
+```
+User (WhatsApp / Telegram / Discord)
+  |
+  v
+OpenClaw Gateway (Node.js)
+  |
+  v
+Lead Orchestrator Agent (AGENTS.md + SOUL.md + spec/)
+  |
+  v  HTTP / SSE
+Factory (Elixir/OTP)
+  |
+  v  Erlang Ports
+Claude CLI Sessions (background, parallel, --dangerously-skip-permissions)
+  |
+  v
+Code changes, tests, commits in target repositories
+```
 
-- **Autonomous execution** — Architect, Builder, Auditor loop with zero hand-holding
-- **Multi-platform** — WhatsApp, Telegram, Discord, iMessage via OpenClaw
-- **Persistent memory** — Daily notes + curated long-term memory across sessions
-- **Heartbeat system** — Proactive background checks (email, calendar, mentions)
-- **Progressive disclosure** — Lean top-level instructions, detailed specs on demand
+**The agent operates in two modes:**
+
+* **ARCHITECT** — DDD expert, security architect, code reviewer, quality engineer, DevOps engineer, performance engineer. Plans architecture, decomposes tasks, reviews output.
+* **BUILDER** — Session orchestrator, TDD implementation lead, reliability engineer, documentation writer. Launches Claude CLI sessions, monitors progress, auto-responds to routine questions.
+
+**Execution loop:** Architecture > Execution > Quality Gate > Delivery + Code Review/PR Evaluation
 
 ## Quick Start
 
-### Prerequisites
-
-- [OpenClaw](https://docs.openclaw.ai/) installed and gateway running
-- An AI provider API key (e.g., Anthropic) configured in OpenClaw
-
-### 1. Install OpenClaw (if not already)
+### Option A: Docker (zero-install)
 
 ```bash
-curl -fsSL https://openclaw.ai/install.sh | bash
-openclaw onboard --install-daemon
+git clone https://github.com/r3dlex/openclaw-agent-claude.git
+cd openclaw-agent-claude
+cp .env.example .env
+# Edit .env: set AGENT_DATA_DIR and optionally channel tokens
+./scripts/setup.sh --docker --detach
 ```
 
-### 2. Clone & Link Workspace
+This starts two containers:
+* **openclaw** — Gateway + agent workspace (port 18789)
+* **factory** — Elixir session manager (port 4000)
+
+Open `http://localhost:18789` for the web chat UI.
+
+### Option B: Local Install
 
 ```bash
-git clone https://github.com/your-org/openclaw-agent-claude.git
+# 1. Install OpenClaw
+npm install -g openclaw@latest
+openclaw onboard --install-daemon
+openclaw plugins install @betrue/openclaw-claude-code-plugin
+
+# 2. Clone and link workspace
+git clone https://github.com/r3dlex/openclaw-agent-claude.git
 cd openclaw-agent-claude
 ./scripts/setup.sh
+
+# 3. Start the Factory
+cd factory && mix deps.get && mix run --no-halt &
+
+# 4. Pair a channel (or use web chat)
+openclaw pairing whatsapp     # Scan QR code
+openclaw pairing telegram     # Enter bot token
+openclaw dashboard            # Web chat UI
 ```
 
-This runs `openclaw config set agents.defaults.workspace` to point OpenClaw at this repo.
+### First Conversation
 
-### 3. Pair a Channel (optional)
-
-```bash
-openclaw pairing whatsapp    # Scan QR code
-openclaw pairing telegram    # Enter bot token
-openclaw dashboard           # Or just use the web chat
-```
-
-### 4. Start Chatting
-
-The agent bootstraps on first message — it picks a name, learns about you, then gets to work.
-
-### Docker
-
-If running OpenClaw in Docker, mount this repo as the workspace volume:
-
-```bash
-# In your OpenClaw docker-compose.yml, set the workspace bind mount:
-#   ~/.openclaw/workspace → /path/to/this/repo
-```
-
-See [OpenClaw Docker docs](https://docs.openclaw.ai/install/docker) for the full Docker setup.
+The agent bootstraps on its first message. It picks a name, learns about you, then gets to work. Send it a project description and watch it decompose, plan, launch sessions, and deliver.
 
 ## Repository Structure
 
 ```
-├── AGENTS.md            # Agent instructions (top-level, links to spec/)
-├── SOUL.md              # Agent identity, values, interaction style
-├── IDENTITY.md          # Name, avatar, vibe (filled during first run)
-├── USER.md              # About the human (filled at runtime)
-├── HEARTBEAT.md         # Periodic task checklist
-├── TOOLS.md             # Environment-specific tool notes
-├── spec/                # Detailed behavioral specifications
-│   ├── MEMORY.md        # Memory system
-│   ├── HEARTBEAT.md     # Heartbeat polling spec
-│   ├── COMMUNICATION.md # Group chat & platform rules
-│   ├── WORKFLOW.md      # Architect / Builder / Auditor loop
-│   └── SAFETY.md        # Red lines & safety rules
-├── scripts/
-│   └── setup.sh         # Links this repo as the OpenClaw workspace
-├── CLAUDE.md            # Developer/contributor guide
-└── LICENSE              # MIT
+AGENTS.md                      # Top-level agent instructions
+SOUL.md                        # Identity, roles, execution loop
+IDENTITY.md                    # Name, avatar (filled at bootstrap)
+USER.md                        # About you (filled at runtime)
+HEARTBEAT.md                   # Periodic task checklist
+TOOLS.md                       # Environment notes + Factory API
+spec/                          # Detailed behavioral specs
+  ORCHESTRATION.md             # Factory API, session management
+  WORKFLOW.md                  # Four-phase execution loop
+  MEMORY.md                    # Memory system
+  HEARTBEAT.md                 # Heartbeat system
+  COMMUNICATION.md             # Group chat rules
+  SAFETY.md                    # Red lines & session safety
+factory/                       # Elixir/OTP session manager
+  mix.exs                      # Elixir project (Bandit, Plug, PubSub)
+  Dockerfile                   # Multi-stage build (Elixir + Node.js)
+  lib/factory/
+    session/worker.ex          # GenServer per Claude CLI session
+    session/manager.ex         # Lifecycle, limits, garbage collection
+    workspace/tasks.ex         # tasks.md parser
+    workspace/plan.ex          # PLAN.md manager
+    review/evaluator.ex        # Code review session manager
+    review/scoring.ex          # Weighted scoring engine (0-100%)
+    review/manager.ex          # Review lifecycle
+    api/router.ex              # HTTP API + SSE endpoints
+    events/bus.ex              # PubSub event bus
+scripts/
+  Dockerfile                   # OpenClaw gateway image
+  entrypoint.sh                # Gateway startup
+  setup.sh                     # Setup (local or Docker)
+docker-compose.yml             # Two-service deployment
+.env.example                   # All configuration variables
 ```
 
 ## Configuration
 
-This repo is a workspace — it defines agent behavior through markdown files. OpenClaw's own configuration (API keys, channels, models) lives in `~/.openclaw/openclaw.json`.
-
 | What | Where | How |
 |---|---|---|
+| Data directory | `.env` | `AGENT_DATA_DIR=/path/to/data` |
+| Max sessions | `.env` | `MAX_SESSIONS=5` |
 | Agent personality | `SOUL.md` | Edit directly |
-| Agent behavior | `AGENTS.md` → `spec/` | Edit, agent reads at session start |
-| Model selection | `openclaw.json` | `openclaw config set agents.defaults.model <provider/model>` |
-| API keys | OpenClaw secrets | `openclaw secrets configure` or env vars |
+| Agent behavior | `AGENTS.md` > `spec/` | Edit, agent reads at session start |
+| Session orchestration | `spec/ORCHESTRATION.md` | Factory API patterns |
+| Model selection | `.env` or `openclaw.json` | `DEFAULT_MODEL=claude-opus-4-20250514` (opus/sonnet/haiku) |
 | Channel pairing | OpenClaw CLI | `openclaw pairing <channel>` |
-| Heartbeat tasks | `HEARTBEAT.md` | Edit directly, or let the agent manage it |
 
-## How It Works
+## Factory API
 
-1. **First run**: If `BOOTSTRAP.md` exists, the agent performs onboarding — picks a name, learns about you, then deletes the bootstrap file.
-2. **Every session**: Reads `SOUL.md`, `USER.md`, and recent memory files to restore context.
-3. **On request**: Enters Architect mode (plans DDD architecture), Builder mode (implements with tests), or Auditor mode (reviews for quality/security).
-4. **Heartbeats**: Periodically checks email, calendar, and mentions. Reaches out when something needs attention.
+The Factory exposes an HTTP API at `http://localhost:${FACTORY_PORT}`:
+
+| Endpoint | Description |
+|---|---|
+| `POST /api/v1/sessions` | Launch a Claude CLI session |
+| `GET /api/v1/sessions` | List all sessions |
+| `POST /api/v1/sessions/:name/respond` | Send input to a waiting session |
+| `POST /api/v1/sessions/:name/kill` | Terminate a session |
+| `GET /api/v1/events` | SSE event stream |
+| `GET /api/v1/workspace/tasks` | Read tasks.md |
+| `PUT /api/v1/workspace/plan` | Write PLAN.md |
+| `POST /api/v1/reviews` | Launch a code review (codebase or PR) |
+| `GET /api/v1/reviews/:id` | Get review results with scores (0-100%) |
+
+See [spec/ORCHESTRATION.md](spec/ORCHESTRATION.md) for the full API reference.
 
 ## Contributing
 
-See [CLAUDE.md](CLAUDE.md) for the developer guide covering:
-- Repository structure and two-audience separation
-- Progressive disclosure pattern
-- How to add rules, modify personality, or extend capabilities
+See [CLAUDE.md](CLAUDE.md) for the developer guide.
 
 ## License
 

@@ -1,49 +1,91 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# ── OpenClaw Agent Workspace Setup ──
-# Links this repo as the agent workspace for an OpenClaw instance.
+# ── Software Factory Setup ──
+#
+# Sets up the OpenClaw agent workspace and Factory backend.
 #
 # Usage:
-#   ./scripts/setup.sh                    # Uses default agent
-#   ./scripts/setup.sh --agent my-agent   # Uses a specific agent
-#
-# Prerequisites:
-#   - OpenClaw installed: curl -fsSL https://openclaw.ai/install.sh | bash
-#   - Gateway running:    openclaw gateway status
+#   ./scripts/setup.sh                    # Local: link workspace
+#   ./scripts/setup.sh --agent work       # Local: named agent
+#   ./scripts/setup.sh --docker           # Docker: build & start all services
+#   ./scripts/setup.sh --docker --detach  # Docker: start in background
 
 REPO_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 AGENT_ID=""
+USE_DOCKER=false
+DETACH=false
+
+usage() {
+  cat <<'EOF'
+Usage: setup.sh [OPTIONS]
+
+Options:
+  --agent <id>    Configure a named agent (default: agents.defaults)
+  --docker        Use Docker (builds openclaw + factory containers)
+  --detach        Run containers in background (implies --docker)
+  -h, --help      Show this help
+
+Examples:
+  ./scripts/setup.sh                     # Link workspace for default agent
+  ./scripts/setup.sh --agent work        # Link workspace for agent "work"
+  ./scripts/setup.sh --docker --detach   # Build and run everything in Docker
+EOF
+  exit 0
+}
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --agent) AGENT_ID="$2"; shift 2 ;;
-    -h|--help)
-      echo "Usage: $0 [--agent <agent-id>]"
-      echo ""
-      echo "Links this repo as the OpenClaw agent workspace."
-      echo "If --agent is omitted, configures the default agent."
-      exit 0
-      ;;
-    *) echo "Unknown option: $1"; exit 1 ;;
+    --agent)  AGENT_ID="$2"; shift 2 ;;
+    --docker) USE_DOCKER=true; shift ;;
+    --detach) USE_DOCKER=true; DETACH=true; shift ;;
+    -h|--help) usage ;;
+    *) echo "Unknown option: $1"; usage ;;
   esac
 done
 
-# Check OpenClaw is installed
+# ── Docker mode ──
+if $USE_DOCKER; then
+  if ! command -v docker &>/dev/null; then
+    echo "ERROR: docker not found."
+    echo "Install Docker: https://docs.docker.com/get-docker/"
+    exit 1
+  fi
+
+  if [ ! -f "${REPO_DIR}/.env" ]; then
+    echo "No .env found. Creating from .env.example..."
+    cp "${REPO_DIR}/.env.example" "${REPO_DIR}/.env"
+    echo ""
+    echo "Edit .env with your settings before starting:"
+    echo "  \$EDITOR .env"
+    echo ""
+    echo "At minimum, set AGENT_DATA_DIR to your data directory."
+    exit 1
+  fi
+
+  echo "Building and starting Software Factory via Docker..."
+  COMPOSE_ARGS=("up" "--build")
+  if $DETACH; then
+    COMPOSE_ARGS+=("-d")
+  fi
+
+  docker compose -f "${REPO_DIR}/docker-compose.yml" "${COMPOSE_ARGS[@]}"
+  exit 0
+fi
+
+# ── Local mode ──
 if ! command -v openclaw &>/dev/null; then
   echo "ERROR: openclaw CLI not found."
-  echo "Install it: curl -fsSL https://openclaw.ai/install.sh | bash"
+  echo ""
+  echo "Install it:"
+  echo "  npm install -g openclaw@latest"
+  echo "  openclaw onboard --install-daemon"
+  echo ""
+  echo "Or use Docker mode:"
+  echo "  $0 --docker"
   exit 1
 fi
 
-# Check gateway is running
-if ! openclaw gateway status &>/dev/null; then
-  echo "WARNING: Gateway is not running."
-  echo "Start it: openclaw gateway"
-  echo ""
-fi
-
-# Configure workspace
 echo "Linking workspace: ${REPO_DIR}"
 
 if [[ -n "$AGENT_ID" ]]; then
@@ -54,13 +96,24 @@ else
   openclaw config set agents.defaults.workspace "${REPO_DIR}"
 fi
 
-# Ensure runtime directories exist
-mkdir -p "${REPO_DIR}/memory"
+# Ensure data dir from .env or default
+if [ -f "${REPO_DIR}/.env" ]; then
+  # shellcheck source=/dev/null
+  source "${REPO_DIR}/.env"
+fi
+DATA_DIR="${AGENT_DATA_DIR:-${REPO_DIR}/data}"
+mkdir -p "${DATA_DIR}/memory" "${DATA_DIR}/logs" "${DATA_DIR}/sessions"
 
 echo ""
-echo "Done. Workspace configured."
+echo "Done. Workspace linked."
 echo ""
-echo "Next steps:"
-echo "  1. Pair a channel:  openclaw pairing whatsapp"
-echo "  2. Or use web chat: openclaw dashboard"
-echo "  3. Start chatting — the agent will bootstrap on first message."
+echo "To start the Factory (Elixir backend):"
+echo "  cd factory && mix deps.get && mix run --no-halt"
+echo ""
+echo "Or use Docker for everything:"
+echo "  $0 --docker --detach"
+echo ""
+echo "To pair a messaging channel:"
+echo "  openclaw pairing whatsapp     # Scan QR code"
+echo "  openclaw pairing telegram     # Enter bot token"
+echo "  openclaw dashboard            # Open web chat UI"

@@ -1,0 +1,34 @@
+services:
+  # OpenClaw Gateway: bridges messaging platforms to the agent
+  openclaw:
+    build:
+      context: ./scripts
+      dockerfile: Dockerfile
+    volumes:
+      - ./:/workspace:rw
+      - ${AGENT_DATA_DIR:-./data}:/workspace/data:rw
+      - openclaw-data:/root/.openclaw
+    env_file:
+      - .env
+    ports:
+      - "${OPENCLAW_GATEWAY_PORT:-18789}:${OPENCLAW_GATEWAY_PORT:-18789}"
+    depends_on:
+      factory:
+        condition: service_started
+    restart: unless-stopped
+
+  # Factory: Elixir/OTP backend managing Claude CLI sessions
+  factory:
+    build:
+      context: ./factory
+      dockerfile: Dockerfile
+    volumes:
+      - ${AGENT_DATA_DIR:-./data}:/data:rw
+    env_file:
+      - .env
+    ports:
+      - "${FACTORY_PORT:-4000}:${FACTORY_PORT:-4000}"
+    restart: unless-stopped
+
+volumes:
+  openclaw-data:

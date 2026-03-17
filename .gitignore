@@ -1,17 +1,22 @@
-# ── Environment & Secrets (just in case) ──
+# ── Secrets & Environment ──
 .env
 .env.local
 .env.*.local
+*.pem
+*.key
+*.crt
 
 # ── OpenClaw Runtime State ──
 .openclaw/
 
-# ── Agent Runtime Data (created at runtime, never committed) ──
+# ── Agent Runtime Data (never committed) ──
 memory/
 /MEMORY.md
 /tasks.md
 /PLAN.md
 /BOOTSTRAP.md
+avatars/
+data/
 
 # ── Claude Code Local Settings ──
 .claude/
@@ -25,6 +30,23 @@ Thumbs.db
 .vscode/
 .idea/
 
-# ── Logs ──
+# ── Logs & Artifacts ──
 *.log
 logs/
+artifacts/
+reports/
+
+# ── Docker runtime ──
+scripts/data/
+
+# ── Node ──
+node_modules/
+
+# ── Elixir (factory build artifacts if built locally) ──
+factory/_build/
+factory/deps/
+factory/cover/
+factory/doc/
+*.ez
+*.beam
+erl_crash.dump
