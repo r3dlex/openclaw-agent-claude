@@ -1,0 +1,37 @@
+# ── Environment & Secrets ──
+.env
+.env.local
+.env.*.local
+
+# ── OpenClaw Runtime State ──
+.openclaw/
+
+# ── Agent Runtime Data (created at runtime, never committed) ──
+memory/
+/MEMORY.md
+/tasks.md
+/PLAN.md
+/BOOTSTRAP.md
+
+# ── Claude Code Local Settings ──
+.claude/
+
+# ── OS & Editor ──
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# ── Node (if applicable) ──
+node_modules/
+npm-debug.log*
+
+# ── Docker ──
+docker-compose.override.yml
+
+# ── Logs ──
+*.log
+logs/
