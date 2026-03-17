@@ -1,4 +1,4 @@
-# ── Environment & Secrets ──
+# ── Environment & Secrets (just in case) ──
 .env
 .env.local
 .env.*.local
@@ -24,13 +24,6 @@ Thumbs.db
 *~
 .vscode/
 .idea/
-
-# ── Node (if applicable) ──
-node_modules/
-npm-debug.log*
-
-# ── Docker ──
-docker-compose.override.yml
 
 # ── Logs ──
 *.log

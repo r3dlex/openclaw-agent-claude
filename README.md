@@ -11,34 +11,53 @@ This repo defines a Claude-powered agent that operates as a **Lead Orchestrator*
 - **Persistent memory** — Daily notes + curated long-term memory across sessions
 - **Heartbeat system** — Proactive background checks (email, calendar, mentions)
 - **Progressive disclosure** — Lean top-level instructions, detailed specs on demand
-- **Zero-install** — Docker container with everything included
 
 ## Quick Start
 
-### 1. Clone & Configure
+### Prerequisites
+
+- [OpenClaw](https://docs.openclaw.ai/) installed and gateway running
+- An AI provider API key (e.g., Anthropic) configured in OpenClaw
+
+### 1. Install OpenClaw (if not already)
+
+```bash
+curl -fsSL https://openclaw.ai/install.sh | bash
+openclaw onboard --install-daemon
+```
+
+### 2. Clone & Link Workspace
 
 ```bash
 git clone https://github.com/your-org/openclaw-agent-claude.git
 cd openclaw-agent-claude
-cp .env.example .env
-# Edit .env with your API key and preferences
+./scripts/setup.sh
 ```
 
-### 2. Run with Docker (recommended)
+This runs `openclaw config set agents.defaults.workspace` to point OpenClaw at this repo.
+
+### 3. Pair a Channel (optional)
 
 ```bash
-docker build -t openclaw-agent -f scripts/Dockerfile .
-docker run --rm --env-file .env -v "$(pwd)":/workspace openclaw-agent
+openclaw pairing whatsapp    # Scan QR code
+openclaw pairing telegram    # Enter bot token
+openclaw dashboard           # Or just use the web chat
 ```
 
-### 3. Or Run Locally
+### 4. Start Chatting
 
-Requires [Node.js 24+](https://nodejs.org/) and [OpenClaw](https://docs.openclaw.ai/):
+The agent bootstraps on first message — it picks a name, learns about you, then gets to work.
+
+### Docker
+
+If running OpenClaw in Docker, mount this repo as the workspace volume:
 
 ```bash
-npm install -g openclaw
-openclaw start --workspace .
+# In your OpenClaw docker-compose.yml, set the workspace bind mount:
+#   ~/.openclaw/workspace → /path/to/this/repo
 ```
+
+See [OpenClaw Docker docs](https://docs.openclaw.ai/install/docker) for the full Docker setup.
 
 ## Repository Structure
 
@@ -55,27 +74,24 @@ openclaw start --workspace .
 │   ├── COMMUNICATION.md # Group chat & platform rules
 │   ├── WORKFLOW.md      # Architect / Builder / Auditor loop
 │   └── SAFETY.md        # Red lines & safety rules
-├── scripts/             # Containerized operations
-│   ├── Dockerfile       # Zero-install container
-│   └── entrypoint.sh    # Container entrypoint
+├── scripts/
+│   └── setup.sh         # Links this repo as the OpenClaw workspace
 ├── CLAUDE.md            # Developer/contributor guide
-├── .env.example         # Environment variable template
 └── LICENSE              # MIT
 ```
 
 ## Configuration
 
-All configuration is via environment variables. Copy `.env.example` to `.env` and fill in your values.
+This repo is a workspace — it defines agent behavior through markdown files. OpenClaw's own configuration (API keys, channels, models) lives in `~/.openclaw/openclaw.json`.
 
-| Variable | Required | Description |
+| What | Where | How |
 |---|---|---|
-| `AGENT_API_KEY` | Yes | AI provider API key |
-| `OPENCLAW_WORKSPACE` | Yes | Path to this repo |
-| `AGENT_MODEL` | No | Model ID (default: claude-sonnet-4-20250514) |
-| `HEARTBEAT_INTERVAL` | No | Poll interval in seconds (default: 1800) |
-| `AGENT_TIMEZONE` | No | Timezone (default: UTC) |
-| `DISCORD_BOT_TOKEN` | No | Discord integration |
-| `TELEGRAM_BOT_TOKEN` | No | Telegram integration |
+| Agent personality | `SOUL.md` | Edit directly |
+| Agent behavior | `AGENTS.md` → `spec/` | Edit, agent reads at session start |
+| Model selection | `openclaw.json` | `openclaw config set agents.defaults.model <provider/model>` |
+| API keys | OpenClaw secrets | `openclaw secrets configure` or env vars |
+| Channel pairing | OpenClaw CLI | `openclaw pairing <channel>` |
+| Heartbeat tasks | `HEARTBEAT.md` | Edit directly, or let the agent manage it |
 
 ## How It Works
 

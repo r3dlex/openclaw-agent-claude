@@ -4,9 +4,9 @@
 
 ## What Is This Repo?
 
-An autonomous AI agent configuration for [OpenClaw](https://docs.openclaw.ai/), a self-hosted gateway that bridges messaging platforms (WhatsApp, Telegram, Discord, iMessage) to AI coding agents.
+An [OpenClaw](https://docs.openclaw.ai/) agent workspace — the set of markdown files that define an autonomous AI agent's personality, workflow, memory system, and behavioral rules.
 
-This repo defines the agent's personality, workflow, memory system, and behavioral rules. It is not a traditional codebase — it is a **workspace specification** for an autonomous agent.
+OpenClaw is a self-hosted gateway bridging messaging platforms (WhatsApp, Telegram, Discord, iMessage, etc.) to AI agents. This repo is **not** the gateway itself — it's the workspace configuration that OpenClaw loads at runtime. OpenClaw handles its own installation, Docker deployment, and secret management separately.
 
 ## Repository Structure
 
@@ -25,10 +25,8 @@ This repo defines the agent's personality, workflow, memory system, and behavior
 │   ├── COMMUNICATION.md # Group chat rules, platform formatting
 │   ├── WORKFLOW.md      # Architect / Builder / Auditor execution loop
 │   └── SAFETY.md        # Red lines, internal vs external actions
-├── scripts/             # Containerized operational scripts
-│   ├── Dockerfile       # Zero-install container for running the agent
-│   └── entrypoint.sh    # Container entrypoint
-├── .env.example         # Template for required environment variables
+├── scripts/
+│   └── setup.sh         # Links this repo as the OpenClaw workspace
 ├── .gitignore           # Protects secrets and runtime data
 ├── LICENSE              # MIT
 └── README.md            # Public-facing documentation
@@ -53,39 +51,23 @@ The agent's instructions follow progressive disclosure:
 
 This minimizes token usage while keeping full specifications accessible.
 
-## Environment Variables
+## How OpenClaw Configuration Works
 
-All configuration lives in `.env` (never committed). See `.env.example` for the template.
+This repo does **not** manage OpenClaw's configuration. OpenClaw stores its settings in `~/.openclaw/openclaw.json` (JSON5 format). Key concepts:
 
-Key variables:
-- `AGENT_API_KEY` — AI provider API key (required)
-- `OPENCLAW_WORKSPACE` — absolute path to this repo
-- `AGENT_MODEL` — model to use (default: claude-sonnet-4-20250514)
-- `HEARTBEAT_INTERVAL` — polling interval in seconds
-- Channel tokens (`DISCORD_BOT_TOKEN`, `TELEGRAM_BOT_TOKEN`, etc.)
+- **Workspace path**: Set via `openclaw config set agents.defaults.workspace /path/to/this/repo` or using `scripts/setup.sh`.
+- **API keys & secrets**: Managed by OpenClaw's SecretRef system (`openclaw secrets configure`), or via environment variables like `ANTHROPIC_API_KEY`, `DISCORD_BOT_TOKEN`, `TELEGRAM_BOT_TOKEN`.
+- **Channel pairing**: Done via `openclaw pairing whatsapp`, `openclaw pairing telegram`, etc.
+- **Model selection**: Set in `openclaw.json` under `agents.defaults.model` or per-agent in `agents.list`.
 
-## Running with Docker (Zero-Install)
-
-```bash
-# Build
-docker build -t openclaw-agent -f scripts/Dockerfile .
-
-# Run (mount workspace + env file)
-docker run --rm \
-  --env-file .env \
-  -v "$(pwd)":/workspace \
-  openclaw-agent
-```
-
-No local dependencies required beyond Docker.
+See [OpenClaw docs](https://docs.openclaw.ai/gateway/configuration-reference) for the full configuration reference.
 
 ## Development Guidelines
 
-- **Security first:** Never commit `.env`, `MEMORY.md`, `memory/`, or `.openclaw/`. The `.gitignore` handles this.
+- **Security first:** Never commit `MEMORY.md`, `memory/`, `.openclaw/`, or files with credentials. The `.gitignore` handles this.
 - **Keep AGENTS.md lean:** Add detail to `spec/` files, not the top-level.
 - **Test behavioral changes:** Modify the spec, run the agent, observe. The agent is autonomous — it will adapt.
-- **No hardcoded paths:** Use `$OPENCLAW_WORKSPACE` or relative paths.
-- **No hardcoded secrets:** Everything goes through `.env`.
+- **No hardcoded paths:** Use relative paths within the workspace.
 
 ## Common Tasks
 
@@ -104,4 +86,4 @@ No local dependencies required beyond Docker.
 
 ### Adding environment-specific tool config
 1. Document it in `TOOLS.md` (agent-facing).
-2. If it requires secrets, add the variable to `.env.example`.
+2. If it requires secrets, configure them via `openclaw secrets configure`.
