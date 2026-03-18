@@ -164,6 +164,8 @@ poetry run pipeline run ci --project ../.. --ci    # CI mode (exit code)
 
 Available pipelines: `security`, `architecture`, `quality`, `test`, `full`, `pre-commit`, `ci`.
 
+GitHub Actions run all pipelines on every push and PR (`.github/workflows/ci.yml`). PRs also get a sensitive data scan (`.github/workflows/pr-review.yml`).
+
 See [spec/PIPELINES.md](spec/PIPELINES.md) for details. Architecture decisions tracked via [archgate](https://github.com/archgate/cli) in `.archgate/adrs/`. See [spec/ARCHITECTURE.md](spec/ARCHITECTURE.md).
 
 ## Contributing

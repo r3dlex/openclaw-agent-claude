@@ -102,23 +102,27 @@ Steps follow these principles:
 
 ### GitHub Actions
 
-```yaml
-name: Pipeline
-on: [push, pull_request]
-jobs:
-  validate:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-      - run: pip install poetry
-      - working-directory: tools/pipeline_runner
-        run: |
-          poetry install
-          poetry run pipeline run ci --project ../.. --ci
-```
+The repository includes two workflow files in `.github/workflows/`:
+
+**`.github/workflows/ci.yml`** — Runs on push to main and all PRs:
+
+| Job | Pipeline | What It Does |
+|---|---|---|
+| `security` | `security` | Secrets scan, .gitignore, .env.example |
+| `architecture` | `architecture` | ADR existence and archgate compliance |
+| `quality` | `quality` | Ruff linting |
+| `test-python` | pytest | Pipeline runner test suite with coverage |
+| `test-elixir` | mix test | Factory test suite with coverage |
+| `ci-pass` | gate | Requires all jobs to pass |
+
+**`.github/workflows/pr-review.yml`** — Runs on PRs only:
+
+| Job | What It Does |
+|---|---|
+| `pre-commit-checks` | Runs the `pre-commit` pipeline |
+| `sensitive-data-scan` | Scans PR diff for secrets, local paths, credentials |
+
+Each pipeline runs as a separate job for clear, parallel feedback in the GitHub UI.
 
 ### Pre-commit Hook
 

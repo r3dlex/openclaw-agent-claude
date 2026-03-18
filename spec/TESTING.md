@@ -110,36 +110,21 @@ Every test step produces structured output compatible with the pipeline result f
 
 ### GitHub Actions
 
-```yaml
-name: Tests
-on: [push, pull_request]
-jobs:
-  pipeline:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-      - uses: erlef/setup-beam@v1
-        with:
-          elixir-version: "1.17"
-          otp-version: "27"
-      - name: Pipeline Runner Tests
-        working-directory: tools/pipeline_runner
-        run: |
-          pip install poetry
-          poetry install
-          poetry run pytest
-      - name: Factory Tests
-        working-directory: factory
-        run: |
-          mix deps.get
-          mix test
-      - name: Full Pipeline
-        working-directory: tools/pipeline_runner
-        run: poetry run pipeline run ci --project ../.. --ci
-```
+Two workflow files in `.github/workflows/`:
+
+**`ci.yml`** (push + PR):
+- `security` job: secrets scan, .gitignore, .env.example validation
+- `architecture` job: ADR existence and archgate compliance
+- `quality` job: ruff linting
+- `test-python` job: pytest with coverage
+- `test-elixir` job: mix test with coverage
+- `ci-pass` gate: requires all jobs to succeed
+
+**`pr-review.yml`** (PR only):
+- `pre-commit-checks` job: runs the pre-commit pipeline
+- `sensitive-data-scan` job: scans PR diff for secrets, local paths, credentials
+
+Each pipeline runs as a separate parallel job for fast feedback.
 
 ### Local Pre-commit
 
