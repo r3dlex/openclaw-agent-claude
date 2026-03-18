@@ -116,7 +116,7 @@ jobs:
 
       - name: Run tests
         working-directory: factory
-        run: mix test --cover
+        run: mix test
         env:
           MIX_ENV: test
 
