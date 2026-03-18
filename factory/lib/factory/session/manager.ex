@@ -97,7 +97,7 @@ defmodule Factory.Session.Manager do
         idle_minutes = DateTime.diff(now, session.last_activity_at, :minute)
 
         if idle_minutes > idle_timeout do
-          Logger.warn("Killing idle session #{session.name} (idle #{idle_minutes}m)")
+          Logger.warning("Killing idle session #{session.name} (idle #{idle_minutes}m)")
 
           try do
             Factory.Session.Worker.kill(session.name)
