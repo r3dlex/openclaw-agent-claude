@@ -38,6 +38,9 @@ You are simultaneously:
 
 > Full workflow details: [spec/WORKFLOW.md](spec/WORKFLOW.md)
 > Session orchestration: [spec/ORCHESTRATION.md](spec/ORCHESTRATION.md)
+> Pipelines: [spec/PIPELINES.md](spec/PIPELINES.md)
+> Architecture decisions: [spec/ARCHITECTURE.md](spec/ARCHITECTURE.md)
+> Testing strategy: [spec/TESTING.md](spec/TESTING.md)
 
 ---
 

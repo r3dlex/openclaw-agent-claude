@@ -85,7 +85,10 @@ HEARTBEAT.md                   # Periodic task checklist
 TOOLS.md                       # Environment notes + Factory API
 spec/                          # Detailed behavioral specs
   ORCHESTRATION.md             # Factory API, session management
-  WORKFLOW.md                  # Four-phase execution loop
+  WORKFLOW.md                  # Execution loop (5 phases)
+  PIPELINES.md                 # Pipeline runner framework
+  ARCHITECTURE.md              # ADR management via archgate
+  TESTING.md                   # Testing strategy and coverage
   MEMORY.md                    # Memory system
   HEARTBEAT.md                 # Heartbeat system
   COMMUNICATION.md             # Group chat rules
@@ -103,6 +106,13 @@ factory/                       # Elixir/OTP session manager
     review/manager.ex          # Review lifecycle
     api/router.ex              # HTTP API + SSE endpoints
     events/bus.ex              # PubSub event bus
+tools/                         # Development tooling
+  pipeline_runner/             # Python pipeline framework (Poetry)
+    pyproject.toml             # Dependencies, pytest config, ruff
+    pipeline_runner/           # Source: models, steps, runner, cli
+    tests/                     # pytest suite (80% coverage target)
+.archgate/                     # Architecture Decision Records
+  adrs/                        # ARCH-###-title.md files
 scripts/
   Dockerfile                   # OpenClaw gateway image
   entrypoint.sh                # Gateway startup
@@ -140,6 +150,21 @@ The Factory exposes an HTTP API at `http://localhost:${FACTORY_PORT}`:
 | `GET /api/v1/reviews/:id` | Get review results with scores (0-100%) |
 
 See [spec/ORCHESTRATION.md](spec/ORCHESTRATION.md) for the full API reference.
+
+## Pipelines
+
+Automated validation via Python pipeline runner (`tools/pipeline_runner/`):
+
+```bash
+cd tools/pipeline_runner && poetry install
+poetry run pipeline run security --project ../..   # Secrets, .gitignore, .env
+poetry run pipeline run full --project ../..       # All checks
+poetry run pipeline run ci --project ../.. --ci    # CI mode (exit code)
+```
+
+Available pipelines: `security`, `architecture`, `quality`, `test`, `full`, `pre-commit`, `ci`.
+
+See [spec/PIPELINES.md](spec/PIPELINES.md) for details. Architecture decisions tracked via [archgate](https://github.com/archgate/cli) in `.archgate/adrs/`. See [spec/ARCHITECTURE.md](spec/ARCHITECTURE.md).
 
 ## Contributing
 

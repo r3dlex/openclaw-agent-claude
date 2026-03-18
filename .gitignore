@@ -42,6 +42,19 @@ scripts/data/
 # ── Node ──
 node_modules/
 
+# ── Python (pipeline runner build artifacts) ──
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+.venv/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+tools/pipeline_runner/poetry.lock
+
 # ── Elixir (factory build artifacts if built locally) ──
 factory/_build/
 factory/deps/

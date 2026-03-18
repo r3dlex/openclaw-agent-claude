@@ -24,7 +24,10 @@ A Software Factory built on [OpenClaw](https://docs.openclaw.ai/) and an Elixir/
 ├── TOOLS.md                       # Environment notes + Factory API reference
 ├── spec/                          # Detailed specs (agent reads on-demand)
 │   ├── ORCHESTRATION.md           # Factory API, session management
-│   ├── WORKFLOW.md                # Four-phase execution loop
+│   ├── WORKFLOW.md                # Execution loop (5 phases)
+│   ├── PIPELINES.md               # Pipeline runner framework
+│   ├── ARCHITECTURE.md            # ADR management via archgate
+│   ├── TESTING.md                 # Testing strategy and coverage
 │   ├── MEMORY.md                  # Memory system
 │   ├── HEARTBEAT.md               # Heartbeat system
 │   ├── COMMUNICATION.md           # Group chat rules
@@ -45,6 +48,13 @@ A Software Factory built on [OpenClaw](https://docs.openclaw.ai/) and an Elixir/
 │       ├── api/router.ex          # HTTP API + SSE endpoints
 │       ├── events/bus.ex          # PubSub event bus
 │       └── logging/               # Disk-based session logging
+├── tools/                         # Development tooling
+│   └── pipeline_runner/           # Python pipeline framework (Poetry)
+│       ├── pyproject.toml         # Dependencies, pytest config, ruff
+│       ├── pipeline_runner/       # Source: models, steps, runner, cli
+│       └── tests/                 # pytest suite (80% coverage target)
+├── .archgate/                     # Architecture Decision Records
+│   └── adrs/                      # ARCH-###-title.md files
 ├── scripts/
 │   ├── Dockerfile                 # OpenClaw gateway image
 │   ├── entrypoint.sh             # Gateway startup
@@ -112,6 +122,20 @@ docker compose up --build
 1. Edit Elixir modules in `factory/lib/`.
 2. Run tests: `cd factory && mix test`.
 3. The API surface is in `factory/lib/factory/api/router.ex`.
+
+### Running Pipelines
+```bash
+cd tools/pipeline_runner
+poetry install
+poetry run pytest                              # Run pipeline runner tests
+poetry run pipeline run security --project ../..   # Security scan
+poetry run pipeline run full --project ../..       # All checks
+```
+
+### Adding an Architecture Decision
+1. Create `.archgate/adrs/ARCH-###-title.md` with YAML frontmatter (id, title, domain).
+2. Validate: `poetry run pipeline run architecture --project ../..`
+3. See [spec/ARCHITECTURE.md](spec/ARCHITECTURE.md) for the full template.
 
 ### Modifying the agent's personality
 1. Edit `SOUL.md` for roles, values, interaction style.

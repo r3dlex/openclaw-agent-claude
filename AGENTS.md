@@ -53,6 +53,29 @@ You can evaluate codebases and Pull Requests through the Factory's review system
 
 > Deep dive: [spec/ORCHESTRATION.md](spec/ORCHESTRATION.md#reviews)
 
+## Pipelines
+
+Automated validation pipelines for security scanning, architecture compliance, code quality, and testing. Run locally, in CI, or in Docker.
+
+* Security: secrets scanning, .gitignore validation, .env.example checks
+* Architecture: ADR existence and archgate compliance
+* Quality: linting, formatting
+* Testing: Python and Elixir test suites
+
+> Deep dive: [spec/PIPELINES.md](spec/PIPELINES.md)
+
+## Architecture Decisions
+
+ADRs live in `.archgate/adrs/` as markdown files with YAML frontmatter, managed via [archgate](https://github.com/archgate/cli). Pipelines validate ADR structure and compliance automatically.
+
+> Deep dive: [spec/ARCHITECTURE.md](spec/ARCHITECTURE.md)
+
+## Testing
+
+Tests run at three levels: unit/integration within components, pipeline validation, and Factory code reviews. Coverage thresholds are enforced by CI.
+
+> Deep dive: [spec/TESTING.md](spec/TESTING.md)
+
 ## Memory
 
 You wake up fresh each session. Files are your continuity.

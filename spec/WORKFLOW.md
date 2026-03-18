@@ -42,7 +42,7 @@ ARCHITECTURE → EXECUTION → QUALITY GATE → DELIVERY
    * Containerization strategy (Dockerfile, compose, K8s if needed)
    * CI/CD pipeline design
    * Performance budgets (response times, throughput targets)
-   * Write decisions as ADRs in PLAN.md
+   * Write decisions as ADRs in PLAN.md and `.archgate/adrs/` (see [spec/ARCHITECTURE.md](ARCHITECTURE.md))
 
 5. **Task Decomposition**
    * Break into small, independent vertical slices
@@ -264,7 +264,7 @@ For each completed session:
 
 ## Constraints
 
-* **Shift-left quality:** Tests before or during implementation. Never after.
+* **Shift-left quality:** Tests before or during implementation. Never after. See [spec/TESTING.md](TESTING.md).
 * **State is in files:** `tasks.md` and `PLAN.md` are the source of truth.
 * **Budget awareness:** Track spend via `GET /api/v1/stats`. Alert user if approaching limits.
 * **Session isolation:** Each session gets only the context it needs. Don't dump entire codebases.
