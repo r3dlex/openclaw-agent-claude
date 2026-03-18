@@ -37,7 +37,10 @@ class SecretsScanner:
     ]
 
     SKIP_EXTENSIONS = {".lock", ".sum", ".beam", ".pyc", ".exe", ".bin", ".png", ".jpg", ".gif", ".ico"}
-    SKIP_DIRS = {".git", "__pycache__", "node_modules", "_build", "deps", ".archgate", ".ruff_cache", ".mypy_cache", ".pytest_cache"}
+    SKIP_DIRS = {
+        ".git", "__pycache__", "node_modules", "_build", "deps",
+        ".archgate", ".ruff_cache", ".mypy_cache", ".pytest_cache",
+    }
     SKIP_PATHS = {"tests/", "test/", "test_", "_test.py", "spec/"}
 
     def run(self, project_root: Path) -> StepResult:
