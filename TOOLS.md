@@ -13,6 +13,13 @@ Skills define _how_ tools work. This file is for _your_ specifics.
 * **Path:** `$AGENT_DATA_DIR` (see .env)
 * **Contains:** `tasks.md`, `PLAN.md`, `memory/`, `logs/`, `sessions/`
 
+## Workspace Logs
+
+* **Path:** `logs/` (workspace root)
+* **Purpose:** Local development logs, pipeline output, debug logs
+* **Git:** Directory tracked via `.gitkeep`, contents gitignored
+* **Factory logs** still go to `$AGENT_DATA_DIR/logs/` (separate from workspace logs)
+
 ## Environment-Specific Details
 
 Add your specifics here:

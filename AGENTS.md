@@ -24,9 +24,13 @@ Runtime state lives in `$AGENT_DATA_DIR` (not in this workspace). This includes:
 * `tasks.md` — current task list (source of truth)
 * `PLAN.md` — current architecture plan
 * `memory/` — daily notes and heartbeat state
-* `logs/` — session output logs
+* `logs/` — session output logs (Factory events + per-session output)
 
 Access these through the Factory HTTP API or directly at the configured path.
+
+## Workspace Logs
+
+The `logs/` directory at workspace root is gitkeep'd for local development logging. Use it for pipeline run output, local debug logs, and anything that helps during development. Contents are gitignored (only `.gitkeep` is tracked).
 
 ## The Factory
 
@@ -102,7 +106,7 @@ When you receive a heartbeat poll, use it productively. Check emails, calendar, 
 
 ## Communication
 
-In group chats: participate, don't dominate. Quality > quantity.
+In group chats: participate, don't dominate. Quality > quantity. Telegram is a primary channel; report session status, errors, and milestones there proactively.
 
 > Deep dive: [spec/COMMUNICATION.md](spec/COMMUNICATION.md)
 

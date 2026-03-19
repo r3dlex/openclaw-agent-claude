@@ -30,7 +30,7 @@ A Software Factory built on [OpenClaw](https://docs.openclaw.ai/) and an Elixir/
 │   ├── TESTING.md                 # Testing strategy and coverage
 │   ├── MEMORY.md                  # Memory system
 │   ├── HEARTBEAT.md               # Heartbeat system
-│   ├── COMMUNICATION.md           # Group chat rules
+│   ├── COMMUNICATION.md           # Channel rules (Telegram, Discord, etc.)
 │   └── SAFETY.md                  # Red lines, session safety
 ├── factory/                       # Elixir/OTP session manager
 │   ├── mix.exs                    # Dependencies (Bandit, Plug, Jason, PubSub)
@@ -53,6 +53,7 @@ A Software Factory built on [OpenClaw](https://docs.openclaw.ai/) and an Elixir/
 │       ├── pyproject.toml         # Dependencies, pytest config, ruff
 │       ├── pipeline_runner/       # Source: models, steps, runner, cli
 │       └── tests/                 # pytest suite (80% coverage target)
+├── logs/                          # Local dev logs (gitkeep'd, contents ignored)
 ├── .archgate/                     # Architecture Decision Records
 │   └── adrs/                      # ARCH-###-title.md files
 ├── scripts/
