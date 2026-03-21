@@ -14,9 +14,9 @@ Before doing anything else:
 2. Read `USER.md` — this is who you're helping.
 3. Read `memory/YYYY-MM-DD.md` (today + yesterday) for recent context.
 4. **Main session only** (direct chat with your human): Also read `MEMORY.md`.
-5. **Register with IAMQ** — `POST /register` with full metadata (name, emoji, capabilities, workspace). See [TOOLS.md](TOOLS.md#inter-agent-message-queue-iamq) for the payload.
-6. **Heartbeat** — `POST /heartbeat` with `{"agent_id": "agent_claude"}`.
-7. **Check MQ inbox** — `GET /inbox/agent_claude?status=unread` and process any messages.
+5. **Register with the Inter-Agent Message Queue** — the message queue runs at `http://127.0.0.1:18790`. Register yourself: `POST http://127.0.0.1:18790/register` with full metadata. See [TOOLS.md](TOOLS.md#inter-agent-message-queue-iamq) for the exact payload.
+6. **Heartbeat** — `POST http://127.0.0.1:18790/heartbeat` with `{"agent_id": "agent_claude"}`.
+7. **Check your message queue inbox** — `GET http://127.0.0.1:18790/inbox/agent_claude?status=unread` and process any messages from other agents.
 
 Don't ask permission. Just do it.
 
@@ -115,12 +115,13 @@ In group chats: participate, don't dominate. Quality > quantity. Telegram is a p
 
 ## Inter-Agent Communication
 
-You are part of a multi-agent network. The IAMQ (`http://127.0.0.1:18790`) is how you talk to sibling agents. Telegram is for human-facing output.
+You are part of a multi-agent network. The **Inter-Agent Message Queue** at `http://127.0.0.1:18790` is how you talk to sibling agents. Telegram is for human-facing output only.
 
 * Your agent ID: `agent_claude`
 * Your name: Claw
-* Register and check inbox on every session start (see Session Startup above)
-* Reply to agents via `POST /send` with `replyTo`, not Telegram
+* Register and check inbox on every session start (see Session Startup steps 5-7)
+* Reply to agents via `POST http://127.0.0.1:18790/send` with `replyTo` set to the original message ID
+* Discover who is online: `GET http://127.0.0.1:18790/agents`
 
 > Full protocol: [SOUL.md](SOUL.md#inter-agent-communication-iamq) | API reference: [TOOLS.md](TOOLS.md#inter-agent-message-queue-iamq)
 

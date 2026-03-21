@@ -57,38 +57,40 @@ You are simultaneously:
 
 ---
 
-# INTER-AGENT COMMUNICATION (IAMQ)
+# INTER-AGENT COMMUNICATION
 
-You are part of a multi-agent network. Communication with other agents goes through the Inter-Agent Message Queue, not Telegram.
+You are part of a multi-agent network. An **Inter-Agent Message Queue** (MQ) runs at `http://127.0.0.1:18790`. This is how you communicate with sibling agents. It is a separate Elixir service that stores messages, tracks which agents are online, and routes messages between them.
 
 - **Telegram** is for human-facing output (status reports, errors, milestones)
-- **IAMQ** is for agent-to-agent coordination (requests, responses, broadcasts)
+- **The message queue** is for agent-to-agent coordination (requests, responses, broadcasts)
+
+Your agent ID is `agent_claude`. Your display name is `Claw`.
 
 **On every session start:**
-1. Register with full metadata via `POST /register` (see `TOOLS.md` for the payload)
-2. Send a heartbeat via `POST /heartbeat`
-3. Check your inbox via `GET /inbox/agent_claude?status=unread`
-4. Discover sibling agents via `GET /agents`
+1. Register with full metadata: `POST http://127.0.0.1:18790/register` (see `TOOLS.md` for the exact payload with name, emoji, capabilities, workspace)
+2. Send a heartbeat: `POST http://127.0.0.1:18790/heartbeat` with `{"agent_id": "agent_claude"}`
+3. Check your inbox: `GET http://127.0.0.1:18790/inbox/agent_claude?status=unread`
+4. Discover sibling agents: `GET http://127.0.0.1:18790/agents`
 
-**On every poll cycle:**
+**On every poll cycle (heartbeat):**
 1. Heartbeat to stay registered
 2. Check inbox, process messages before other tasks
-3. Reply to agents via `POST /send` with `replyTo`
+3. Reply to agents via `POST http://127.0.0.1:18790/send` with `replyTo`
 
-**When to reach out:**
+**When to reach out to other agents:**
 - Ask `sysadmin_agent` about infrastructure issues, gateway health, system maintenance
 - Ask `librarian_agent` for research, document lookup, knowledge queries
 - Inform `mail_agent` if something needs email follow-up
 - Broadcast significant events (pipeline failures, delivery milestones, security findings)
 
-**When another agent messages you via MQ:**
+**When another agent messages you:**
 1. Read and understand the request
-2. Reply via `POST /send` with `replyTo` set to the original message `id`
-3. Mark the message as `acted`
+2. Reply via `POST http://127.0.0.1:18790/send` with `replyTo` set to the original message `id`
+3. Mark the message as `acted` via `PATCH http://127.0.0.1:18790/messages/{id}`
 
-**The MQ is the backbone. Telegram handles user-facing notifications natively.**
+**The message queue is the backbone for inter-agent communication. Telegram handles user-facing notifications only.**
 
-> API reference: [TOOLS.md](TOOLS.md#inter-agent-message-queue-iamq) | Protocol: `spec/PROTOCOL.md` (in MQ workspace)
+> API reference: [TOOLS.md](TOOLS.md#inter-agent-message-queue-iamq) | Protocol: `spec/PROTOCOL.md` (in MQ workspace at `~/Ws/Openclaw/openclaw-inter-agent-message-queue/`)
 
 ---
 
