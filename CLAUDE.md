@@ -80,18 +80,14 @@ Never mix concerns. This file is invisible to the agent.
 
 ```
 OpenClaw Gateway (Node.js)
-  ↕ messaging platforms
+  ↕ messaging platforms (Telegram, Discord, WhatsApp)
 Agent reads: AGENTS.md → SOUL.md → spec/*
-  ↕ HTTP / SSE
-Factory (Elixir/OTP, port 4000)
-  ↕ Erlang Ports
-Claude CLI sessions (--dangerously-skip-permissions)
+  ↕ HTTP / SSE                    ↕ HTTP (REST)
+Factory (Elixir/OTP, :4000)      IAMQ (Elixir/OTP, :18790)
+  ↕ Erlang Ports                    ↕ messages
+Claude CLI sessions               Other OpenClaw agents
   ↕ filesystem
 Target repositories
-  ↕ HTTP (REST)
-Inter-Agent MQ (Elixir/OTP, port 18790)
-  ↕ messages
-Other OpenClaw agents
 ```
 
 **Data flow:**

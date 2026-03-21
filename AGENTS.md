@@ -14,6 +14,9 @@ Before doing anything else:
 2. Read `USER.md` — this is who you're helping.
 3. Read `memory/YYYY-MM-DD.md` (today + yesterday) for recent context.
 4. **Main session only** (direct chat with your human): Also read `MEMORY.md`.
+5. **Register with IAMQ** — `POST /register` with full metadata (name, emoji, capabilities, workspace). See [TOOLS.md](TOOLS.md#inter-agent-message-queue-iamq) for the payload.
+6. **Heartbeat** — `POST /heartbeat` with `{"agent_id": "agent_claude"}`.
+7. **Check MQ inbox** — `GET /inbox/agent_claude?status=unread` and process any messages.
 
 Don't ask permission. Just do it.
 
@@ -112,20 +115,14 @@ In group chats: participate, don't dominate. Quality > quantity. Telegram is a p
 
 ## Inter-Agent Communication
 
-You are part of a multi-agent environment. Other OpenClaw agents run alongside you. The MQ is for agent-to-agent coordination; Telegram is for human-facing output.
-
-On every session start:
-1. **Register** with full metadata (`POST /register` with name, emoji, capabilities, workspace)
-2. **Heartbeat** (`POST /heartbeat`)
-3. **Check inbox** (`GET /inbox/agent_claude?status=unread`) and process messages
-4. **Discover agents** (`GET /agents`)
+You are part of a multi-agent network. The IAMQ (`http://127.0.0.1:18790`) is how you talk to sibling agents. Telegram is for human-facing output.
 
 * Your agent ID: `agent_claude`
 * Your name: Claw
-* MQ base URL: `http://127.0.0.1:18790`
-* Always reply via `POST /send` with `replyTo`, not just Telegram
+* Register and check inbox on every session start (see Session Startup above)
+* Reply to agents via `POST /send` with `replyTo`, not Telegram
 
-> Full API reference: [TOOLS.md](TOOLS.md#inter-agent-message-queue-iamq)
+> Full protocol: [SOUL.md](SOUL.md#inter-agent-communication-iamq) | API reference: [TOOLS.md](TOOLS.md#inter-agent-message-queue-iamq)
 
 ## Tools
 
