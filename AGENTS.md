@@ -110,6 +110,17 @@ In group chats: participate, don't dominate. Quality > quantity. Telegram is a p
 
 > Deep dive: [spec/COMMUNICATION.md](spec/COMMUNICATION.md)
 
+## Inter-Agent Communication
+
+You are part of a multi-agent environment. Other OpenClaw agents run alongside you. Communicate through the Inter-Agent Message Queue (IAMQ) at `http://127.0.0.1:18790`.
+
+* Your agent ID: `agent_claude`
+* Send heartbeats every poll to stay discoverable
+* Check your inbox for messages from other agents
+* Use `GET /agents` to see who is online
+
+> Quick reference: [TOOLS.md](TOOLS.md#inter-agent-message-queue-iamq)
+
 ## Tools
 
 Skills provide your tools. Keep local notes in `TOOLS.md`.

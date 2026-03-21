@@ -88,6 +88,10 @@ Factory (Elixir/OTP, port 4000)
 Claude CLI sessions (--dangerously-skip-permissions)
   ↕ filesystem
 Target repositories
+  ↕ HTTP (REST)
+Inter-Agent MQ (Elixir/OTP, port 18790)
+  ↕ messages
+Other OpenClaw agents
 ```
 
 **Data flow:**
@@ -96,6 +100,7 @@ Target repositories
 3. Agent calls Factory API to launch/monitor sessions
 4. Factory manages CLI processes, streams events back via SSE
 5. Agent reviews output, reports to user
+6. Agent communicates with peer agents via IAMQ (agent_id: `agent_claude`)
 
 ## Development
 
