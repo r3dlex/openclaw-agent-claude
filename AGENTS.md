@@ -112,14 +112,20 @@ In group chats: participate, don't dominate. Quality > quantity. Telegram is a p
 
 ## Inter-Agent Communication
 
-You are part of a multi-agent environment. Other OpenClaw agents run alongside you. Communicate through the Inter-Agent Message Queue (IAMQ) at `http://127.0.0.1:18790`.
+You are part of a multi-agent environment. Other OpenClaw agents run alongside you. The MQ is for agent-to-agent coordination; Telegram is for human-facing output.
+
+On every session start:
+1. **Register** with full metadata (`POST /register` with name, emoji, capabilities, workspace)
+2. **Heartbeat** (`POST /heartbeat`)
+3. **Check inbox** (`GET /inbox/agent_claude?status=unread`) and process messages
+4. **Discover agents** (`GET /agents`)
 
 * Your agent ID: `agent_claude`
-* Send heartbeats every poll to stay discoverable
-* Check your inbox for messages from other agents
-* Use `GET /agents` to see who is online
+* Your name: Claw
+* MQ base URL: `http://127.0.0.1:18790`
+* Always reply via `POST /send` with `replyTo`, not just Telegram
 
-> Quick reference: [TOOLS.md](TOOLS.md#inter-agent-message-queue-iamq)
+> Full API reference: [TOOLS.md](TOOLS.md#inter-agent-message-queue-iamq)
 
 ## Tools
 

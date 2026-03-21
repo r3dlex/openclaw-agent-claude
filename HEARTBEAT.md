@@ -2,8 +2,8 @@
 
 ## Tasks (run on each 5min poll)
 
-1. **MQ heartbeat** — `POST http://127.0.0.1:18790/heartbeat` with `{"agent_id": "agent_claude"}` to stay registered
-2. **Check MQ inbox** — `GET http://127.0.0.1:18790/inbox/agent_claude?status=unread` and process any messages
+1. **MQ heartbeat** — `POST http://127.0.0.1:18790/heartbeat` with `{"agent_id": "agent_claude"}` to stay registered (if first poll of session, do full registration with metadata per TOOLS.md)
+2. **Check MQ inbox** — `GET http://127.0.0.1:18790/inbox/agent_claude?status=unread` — process messages, mark `read`/`acted`, reply via `POST /send` with `replyTo`
 3. **Check online agents** — `GET http://127.0.0.1:18790/agents` to know who is available for collaboration
 4. **Check running sessions** — query `GET /api/v1/sessions` for active sessions, note any failures or completions
 5. **Check task progress** — read `tasks.md` via Factory API, summarize pending vs completed
