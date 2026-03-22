@@ -16,6 +16,9 @@ defmodule Factory.Application do
       # Event bus (PubSub)
       {Phoenix.PubSub, name: Factory.PubSub},
 
+      # Inter-Agent Message Queue client (register, heartbeat, inbox polling)
+      Factory.MqClient,
+
       # Session name registry
       {Registry, keys: :unique, name: Factory.Session.Registry},
 
