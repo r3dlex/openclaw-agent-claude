@@ -31,7 +31,8 @@ defmodule Factory.MixProject do
       {:plug, "~> 1.16"},
       {:jason, "~> 1.4"},
       {:phoenix_pubsub, "~> 2.1"},
-      {:req, "~> 0.5"}
+      {:req, "~> 0.5"},
+      {:websockex, "~> 0.5"}
     ]
   end
 end

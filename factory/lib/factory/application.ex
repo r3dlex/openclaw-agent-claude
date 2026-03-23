@@ -19,6 +19,9 @@ defmodule Factory.Application do
       # Inter-Agent Message Queue client (register, heartbeat, inbox polling)
       Factory.MqClient,
 
+      # IAMQ WebSocket client (real-time message push)
+      Factory.MqWsClient,
+
       # Session name registry
       {Registry, keys: :unique, name: Factory.Session.Registry},
 
