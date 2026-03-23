@@ -170,24 +170,16 @@ defmodule Factory.MqClient do
   defp do_register(%{url: url, agent_id: agent_id}) do
     payload = %{
       agent_id: agent_id,
-      name: "Claw",
-      emoji: "\u{1F528}",
-      description:
-        "Software Factory orchestrator. Manages Claude CLI sessions, code reviews, " <>
-          "pipelines, and end-to-end software delivery.",
-      capabilities: [
-        "software_architecture",
-        "code_generation",
-        "code_review",
-        "session_orchestration",
-        "pipeline_management",
-        "testing",
-        "devops"
-      ],
+      name: System.get_env("IAMQ_AGENT_NAME", "Claw"),
+      emoji: System.get_env("IAMQ_AGENT_EMOJI", "\u{1F528}"),
+      description: System.get_env("IAMQ_AGENT_DESC",
+        "Software Factory orchestrator. Manages Claude CLI sessions, code reviews, pipelines, and end-to-end software delivery."),
+      capabilities: parse_caps(System.get_env("IAMQ_AGENT_CAPABILITIES",
+        "software_architecture,code_generation,code_review,session_orchestration,pipeline_management,testing,devops")),
       workspace: File.cwd!()
     }
 
-    case Req.post("#{url}/register", json: payload) do
+    case Req.post("#{url}/register", json: payload, receive_timeout: 5_000) do
       {:ok, %{status: status}} when status in [200, 201] -> :ok
       {:ok, %{status: status, body: body}} -> {:error, "HTTP #{status}: #{inspect(body)}"}
       {:error, reason} -> {:error, reason}
@@ -195,7 +187,7 @@ defmodule Factory.MqClient do
   end
 
   defp do_heartbeat(%{url: url, agent_id: agent_id}) do
-    case Req.post("#{url}/heartbeat", json: %{agent_id: agent_id}) do
+    case Req.post("#{url}/heartbeat", json: %{agent_id: agent_id}, receive_timeout: 5_000) do
       {:ok, %{status: status}} when status in [200, 201] -> :ok
       {:ok, %{status: status, body: body}} -> {:error, "HTTP #{status}: #{inspect(body)}"}
       {:error, reason} -> {:error, reason}
@@ -205,7 +197,7 @@ defmodule Factory.MqClient do
   defp do_poll_inbox(config, status \\ "unread") do
     %{url: url, agent_id: agent_id} = config
 
-    case Req.get("#{url}/inbox/#{agent_id}", params: [status: status]) do
+    case Req.get("#{url}/inbox/#{agent_id}", params: [status: status], receive_timeout: 5_000) do
       {:ok, %{status: 200, body: %{"messages" => messages}}} -> {:ok, messages}
       {:ok, %{status: 200, body: body}} when is_list(body) -> {:ok, body}
       {:ok, %{status: status_code, body: body}} -> {:error, "HTTP #{status_code}: #{inspect(body)}"}
@@ -227,7 +219,7 @@ defmodule Factory.MqClient do
       expiresAt: Keyword.get(opts, :expires_at, nil)
     }
 
-    case Req.post("#{url}/send", json: payload) do
+    case Req.post("#{url}/send", json: payload, receive_timeout: 5_000) do
       {:ok, %{status: status, body: resp}} when status in [200, 201] -> {:ok, resp}
       {:ok, %{status: status, body: body}} -> {:error, "HTTP #{status}: #{inspect(body)}"}
       {:error, reason} -> {:error, reason}
@@ -237,7 +229,7 @@ defmodule Factory.MqClient do
   defp do_ack(config, message_id, new_status) do
     %{url: url} = config
 
-    case Req.patch("#{url}/messages/#{message_id}", json: %{status: new_status}) do
+    case Req.patch("#{url}/messages/#{message_id}", json: %{status: new_status}, receive_timeout: 5_000) do
       {:ok, %{status: status}} when status in [200, 204] -> :ok
       {:ok, %{status: status, body: body}} -> {:error, "HTTP #{status}: #{inspect(body)}"}
       {:error, reason} -> {:error, reason}
@@ -245,7 +237,7 @@ defmodule Factory.MqClient do
   end
 
   defp do_list_agents(%{url: url}) do
-    case Req.get("#{url}/agents") do
+    case Req.get("#{url}/agents", receive_timeout: 5_000) do
       {:ok, %{status: 200, body: body}} -> {:ok, body}
       {:ok, %{status: status, body: body}} -> {:error, "HTTP #{status}: #{inspect(body)}"}
       {:error, reason} -> {:error, reason}
@@ -253,7 +245,7 @@ defmodule Factory.MqClient do
   end
 
   defp do_status(%{url: url}) do
-    case Req.get("#{url}/status") do
+    case Req.get("#{url}/status", receive_timeout: 5_000) do
       {:ok, %{status: 200, body: body}} -> {:ok, body}
       {:ok, %{status: status, body: body}} -> {:error, "HTTP #{status}: #{inspect(body)}"}
       {:error, reason} -> {:error, reason}
@@ -313,11 +305,14 @@ defmodule Factory.MqClient do
   defp schedule_poll(ms), do: Process.send_after(self(), :poll_inbox, ms)
 
   defp parse_int(nil, default), do: default
-
   defp parse_int(str, default) do
     case Integer.parse(str) do
       {val, _} -> val
       :error -> default
     end
+  end
+
+  defp parse_caps(s) do
+    s |> String.split(",") |> Enum.map(&String.trim/1) |> Enum.reject(&(&1 == ""))
   end
 end
