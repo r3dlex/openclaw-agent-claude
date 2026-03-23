@@ -2,7 +2,7 @@ defmodule Factory.MqWsClient do
   @moduledoc """
   WebSocket client for the OpenClaw Inter-Agent Message Queue (IAMQ).
 
-  Connects to `ws://127.0.0.1:18791/ws` for real-time message push.
+  Connects to `ws://127.0.0.1:18793/ws` for real-time message push.
   On connect, registers with IAMQ and starts a periodic heartbeat.
   Incoming messages are processed immediately without polling delay.
 
@@ -10,7 +10,7 @@ defmodule Factory.MqWsClient do
   continues to poll as normal.
 
   Configuration via environment variables:
-  - IAMQ_WS_URL: WebSocket URL (default: ws://127.0.0.1:18791/ws)
+  - IAMQ_WS_URL: WebSocket URL (default: ws://127.0.0.1:18793/ws)
   - IAMQ_AGENT_ID: This agent's ID (default: agent_claude)
   """
   use WebSockex
@@ -18,7 +18,7 @@ defmodule Factory.MqWsClient do
 
   # NOTE: Default 127.0.0.1 may be intercepted by the OpenClaw gateway (Node.js).
   # If the gateway is running, set IAMQ_WS_URL to bypass it (e.g. use the host LAN IP).
-  @default_ws_url "ws://127.0.0.1:18791/ws"
+  @default_ws_url "ws://127.0.0.1:18793/ws"
   @default_agent_id "agent_claude"
   @heartbeat_interval 30_000
   @reconnect_interval 15_000
