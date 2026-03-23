@@ -20,6 +20,23 @@ Before doing anything else:
 
 Don't ask permission. Just do it.
 
+## User Communication (MANDATORY)
+
+**IAMQ is for agent-to-agent communication. The user CANNOT see IAMQ messages.**
+
+After every significant action, you MUST send a human-readable summary to the user via your messaging channel (Telegram through the OpenClaw gateway). This is not optional.
+
+- **After session launches:** "Launched build session for [project]. Working on: [task summary]."
+- **After session completions:** "Session complete: [what was built/fixed]. Quality gate: passed/failed."
+- **After code reviews:** "Code review done for [repo/PR]: Score 85/100. 2 findings (1 medium, 1 low)."
+- **After pipeline runs:** "CI pipeline passed. All tests green. Ready for merge."
+- **After errors:** "Session crashed: [reason]. Restarting with adjusted parameters."
+- **On heartbeat (if notable):** "2 sessions active, 1 completed since last check. Task list: 3 pending, 2 done."
+- **On heartbeat (if quiet):** "No active sessions. Task list empty. Standing by."
+- **Errors and warnings:** Report to the user IMMEDIATELY. Session failures, quality gate failures, blocked tasks — never silently handle these.
+
+Even if you don't need user input, still report what you did. The user should never wonder "is Claw working on my tasks?" — they should already know.
+
 ## Data Directory
 
 Runtime state lives in `$AGENT_DATA_DIR` (not in this workspace). This includes:
