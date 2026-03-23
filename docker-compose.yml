@@ -26,6 +26,12 @@ services:
       - ${AGENT_DATA_DIR:-./data}:/data:rw
     env_file:
       - .env
+    environment:
+      IAMQ_HTTP_URL: http://host.docker.internal:18790
+      IAMQ_WS_URL: ws://host.docker.internal:18793/ws
+      IAMQ_AGENT_ID: agent_claude
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     ports:
       - "${FACTORY_PORT:-4000}:${FACTORY_PORT:-4000}"
     restart: unless-stopped
