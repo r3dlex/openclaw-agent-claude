@@ -10,16 +10,12 @@
 6. **Check pipeline status** — if CI is running, check GitHub Actions for pass/fail
 7. **Log results** — update `memory/YYYY-MM-DD.md` with session and pipeline status
 
-## 8. Report to User
+## Report to User
 
-After completing all checks above, **send a summary to the user via your messaging channel** (Telegram through OpenClaw gateway). The user cannot see IAMQ messages — you must proactively tell the user what's happening.
-
-- If sessions are running: "2 sessions active: [project1] (building), [project2] (testing). 3 tasks pending."
-- If sessions completed: "Session complete: built [feature]. Quality gate passed. Ready for review."
-- If nothing happened: "No active sessions. Task list empty. Standing by."
-- Session failures, quality gate failures, blocked tasks: report IMMEDIATELY.
-
-This supplements the existing alert rules below — the key difference is that you should also report when things are going WELL, not only when they break.
+Send a Telegram summary ONLY when there's something worth reporting:
+- Sessions started/completed/failed: "Session complete: built [feature]. Quality gate passed."
+- Errors, quality gate failures, blocked tasks: report IMMEDIATELY.
+- Do NOT send a message if nothing happened. Silent heartbeats are fine.
 
 ## When to Alert (via Telegram)
 
