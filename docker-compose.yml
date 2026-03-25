@@ -13,7 +13,6 @@ services:
       IAMQ_HTTP_URL: http://host.docker.internal:18790
       IAMQ_WS_URL: ws://host.docker.internal:18793/ws
       IAMQ_AGENT_ID: agent_claude
-      OPENCLAW_GATEWAY_URL: http://host.docker.internal:18789
     extra_hosts:
       - "host.docker.internal:host-gateway"
     ports:
