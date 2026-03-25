@@ -1,25 +1,6 @@
 services:
-  # OpenClaw Gateway: bridges messaging platforms to the agent
-  openclaw:
-    build:
-      context: ./scripts
-      dockerfile: Dockerfile
-    volumes:
-      - ./:/workspace:rw
-      - ${AGENT_DATA_DIR:-./data}:/workspace/data:rw
-      - ${HOME}/.openclaw:/root/.openclaw:rw
-    env_file:
-      - .env
-    ports:
-      - "${OPENCLAW_GATEWAY_PORT:-18789}:${OPENCLAW_GATEWAY_PORT:-18789}"
-    depends_on:
-      factory:
-        condition: service_started
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    restart: unless-stopped
-
   # Factory: Elixir/OTP backend managing Claude CLI sessions
+  # The OpenClaw gateway runs on the host (port 18789) — no Docker container needed.
   factory:
     build:
       context: ./factory
@@ -32,9 +13,9 @@ services:
       IAMQ_HTTP_URL: http://host.docker.internal:18790
       IAMQ_WS_URL: ws://host.docker.internal:18793/ws
       IAMQ_AGENT_ID: agent_claude
+      OPENCLAW_GATEWAY_URL: http://host.docker.internal:18789
     extra_hosts:
       - "host.docker.internal:host-gateway"
     ports:
       - "${FACTORY_PORT:-4000}:${FACTORY_PORT:-4000}"
     restart: unless-stopped
-
