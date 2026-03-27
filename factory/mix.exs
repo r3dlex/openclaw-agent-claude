@@ -8,7 +8,7 @@ defmodule Factory.MixProject do
       elixir: "~> 1.17",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      test_coverage: [threshold: 0],
+      test_coverage: [summary: [threshold: 5]],
       releases: [
         factory: [
           include_executables_for: [:unix],
