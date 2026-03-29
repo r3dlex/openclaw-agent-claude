@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/logo.svg" alt="OpenClaw Agent Claude logo" width="96" height="96">
+</p>
+
 # Software Factory: Claude Code Orchestrator
 
 An autonomous software factory built on [OpenClaw](https://docs.openclaw.ai/) and Elixir/OTP. It orchestrates multiple [Claude Code](https://docs.anthropic.com/en/docs/claude-code) CLI sessions to build software end-to-end through messaging platforms.
