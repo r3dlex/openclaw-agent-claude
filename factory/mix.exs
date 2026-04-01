@@ -8,7 +8,24 @@ defmodule Factory.MixProject do
       elixir: "~> 1.17",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      test_coverage: [summary: [threshold: 5]],
+      test_coverage: [
+        summary: [threshold: 90],
+        ignore_modules: [
+          # OTP infrastructure — not unit-testable
+          Factory.Application,
+          Factory.MqClient,
+          Factory.MqWsClient,
+          # Port/CLI-dependent — requires live claude binary
+          Factory.Session.Worker,
+          Factory.Session.Manager,
+          # Depends on Session.Worker
+          Factory.Review.Evaluator,
+          # Disk logger — subscribes and writes
+          Factory.Logging.SessionLogger,
+          # HTTP router — SSE endpoints block indefinitely
+          Factory.Api.Router
+        ]
+      ],
       releases: [
         factory: [
           include_executables_for: [:unix],
