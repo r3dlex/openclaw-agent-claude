@@ -2,6 +2,9 @@ defmodule Factory.Application do
   @moduledoc false
   use Application
 
+  # MQ processes are skipped in test env (no IAMQ available, would block/reconnect-loop)
+  @start_mq Mix.env() != :test
+
   @impl true
   def start(_type, _args) do
     port = Application.get_env(:factory, :port, 4000)
@@ -12,35 +15,43 @@ defmodule Factory.Application do
     File.mkdir_p!(Path.join(data_dir, "sessions"))
     File.mkdir_p!(Path.join(data_dir, "memory"))
 
-    children = [
-      # Event bus (PubSub)
-      {Phoenix.PubSub, name: Factory.PubSub},
+    mq_children =
+      if @start_mq do
+        [
+          # Inter-Agent Message Queue client (register, heartbeat, inbox polling)
+          Factory.MqClient,
+          # IAMQ WebSocket client (real-time message push)
+          Factory.MqWsClient
+        ]
+      else
+        []
+      end
 
-      # Inter-Agent Message Queue client (register, heartbeat, inbox polling)
-      Factory.MqClient,
+    children =
+      mq_children ++
+        [
+          # Event bus (PubSub)
+          {Phoenix.PubSub, name: Factory.PubSub},
 
-      # IAMQ WebSocket client (real-time message push)
-      Factory.MqWsClient,
+          # Session name registry
+          {Registry, keys: :unique, name: Factory.Session.Registry},
 
-      # Session name registry
-      {Registry, keys: :unique, name: Factory.Session.Registry},
+          # Dynamic supervisor for session workers
+          {DynamicSupervisor, name: Factory.Session.Supervisor, strategy: :one_for_one},
 
-      # Dynamic supervisor for session workers
-      {DynamicSupervisor, name: Factory.Session.Supervisor, strategy: :one_for_one},
+          # Review registry and supervisor
+          {Registry, keys: :unique, name: Factory.Review.Registry},
+          {DynamicSupervisor, name: Factory.Review.Supervisor, strategy: :one_for_one},
 
-      # Review registry and supervisor
-      {Registry, keys: :unique, name: Factory.Review.Registry},
-      {DynamicSupervisor, name: Factory.Review.Supervisor, strategy: :one_for_one},
+          # Session manager (lifecycle, limits, GC)
+          Factory.Session.Manager,
 
-      # Session manager (lifecycle, limits, GC)
-      Factory.Session.Manager,
+          # Session logger (writes to disk)
+          Factory.Logging.SessionLogger,
 
-      # Session logger (writes to disk)
-      Factory.Logging.SessionLogger,
-
-      # HTTP API server
-      {Bandit, plug: Factory.Api.Router, port: port}
-    ]
+          # HTTP API server
+          {Bandit, plug: Factory.Api.Router, port: port}
+        ]
 
     opts = [strategy: :one_for_one, name: Factory.Supervisor]
     Supervisor.start_link(children, opts)
