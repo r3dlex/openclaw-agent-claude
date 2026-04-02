@@ -64,3 +64,14 @@ factory/doc/
 *.ez
 *.beam
 erl_crash.dump
+
+# ── Elixir/OTP generic artifacts ──
+_build/
+deps/
+cover/
+doc/
+.elixir_ls/
+.lexical/
+priv/plts/
+*.plt
+*.plt.hash
