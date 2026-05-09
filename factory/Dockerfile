@@ -38,6 +38,8 @@ RUN curl -fsSL https://deb.nodesource.com/setup_24.x | bash - \
 # Install Claude Code CLI
 RUN npm install -g @anthropic-ai/claude-code@latest
 
+RUN apt-get update && apt-get install -y --no-install-recommends python3 && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
 COPY --from=builder /app/_build/prod/rel/factory ./

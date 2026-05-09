@@ -7,12 +7,16 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ${AGENT_DATA_DIR:-./data}:/data:rw
+      - ../skills-cli:/skills-cli:ro
+      - ../skills:/workspace/skills:rw
+      - ./skills:/agent/skills:rw
     env_file:
       - .env
     environment:
       IAMQ_HTTP_URL: http://host.docker.internal:18790
       IAMQ_WS_URL: ws://host.docker.internal:18793/ws
       IAMQ_AGENT_ID: agent_claude
+      EMBEDDINGS_URL: http://host.docker.internal:18795
     extra_hosts:
       - "host.docker.internal:host-gateway"
     ports:

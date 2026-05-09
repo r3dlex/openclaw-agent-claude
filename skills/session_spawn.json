@@ -1,0 +1,14 @@
+{
+  "name": "session_spawn",
+  "version": 1,
+  "quality_score": 0.5,
+  "description": "Spawn a new Claude Code CLI session for a task",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "task": {"type": "string", "description": "Description of the task for the new session"},
+      "working_directory": {"type": "string", "description": "Working directory for the new session"}
+    },
+    "required": ["task", "working_directory"]
+  }
+}
